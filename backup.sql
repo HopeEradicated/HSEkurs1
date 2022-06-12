@@ -320,20 +320,6 @@ CREATE TABLE public.shelters (
 ALTER TABLE public.shelters OWNER TO postgres;
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.users (
-    nickname character varying(30) NOT NULL,
-    email character varying(40) NOT NULL,
-    password character varying(30) NOT NULL,
-    city character varying(40) NOT NULL
-);
-
-
-ALTER TABLE public.users OWNER TO postgres;
-
---
 -- Name: dog_purpose id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -405,6 +391,9 @@ COPY public.dog_purpose (id, breed, id_purpose) FROM stdin;
 49	Белая швейцарская овчарка	5
 50	Белая швейцарская овчарка	2
 51	Бельгийская овчарка	5
+52	Золотистый ретривер	3
+53	Золотистый ретривер	5
+54	Золотистый ретривер	1
 \.
 
 
@@ -413,6 +402,7 @@ COPY public.dog_purpose (id, breed, id_purpose) FROM stdin;
 --
 
 COPY public.dogs (breed, main_photo, purposes, full_description, main_characteristics, size, weight_border1, weight_border2, height_male, height_female, max_life_duration) FROM stdin;
+Золотистый ретривер	https://mirsobaki.ru/wp-content/uploads/2019/01/Zolotistyiy-retriver-73.jpg	{Hunting,Service,Companion}	Пожалуй, самая добродушная порода собак, а также одна из наиболее популярных: являются мировыми лидерами в количестве рождённых и зарегестрированных щенков. Крайне нежно и трепетно относятся к детям из-за чего их иногда называют собакми-нянями	{"Очень преданная","Хорошее послушание","Высокий интеллект","Подходит для охоты",Дружелюбная}	крупная	27	36	62	51	12
 Австралийская овчарка	https://placepic.ru/wp-content/uploads/2019/07/merle-dog-long.jpg	{Service,Hunting,Pastoral}	Не собака - мечта	{"Очень преданная",Дружелюбная,"Подходит для охоты"}	Крупная	26	50	53	58	15
 Акита-ину	https://lapkins.ru/upload/uf/78e/78e8b448a6ebc51f00d4f68203c82c9b.jpg	{Companion}	Японский балдёж, всем рекомендую	{"Высокий интеллект","Проживание вне дома","Подходит для охоты"}	Крупная	35	50	66	71	13
 Пудель	https://lapkins.ru/upload/iblock/6e5/6e52cb986e51a236498ecb062598d8a9.jpg	{Hunting,Companion}	Кудрявенькая, выглядит забавно	{"Мало линяет",Дружелюбная,"Подходит для охоты","Хорошее послушание"}	Крупная	26	35	53	58	18
@@ -453,8 +443,13 @@ COPY public.dogs (breed, main_photo, purposes, full_description, main_characteri
 --
 
 COPY public.photogallery (breed, photos) FROM stdin;
-Џг¤Ґ«м	{https://sobakevi4.ru/wp-content/uploads/2020/08/1.-pekines-imeet-drevnie-korni.jpg}
 Пудель	{https://lapkins.ru/upload/iblock/6e5/6e52cb986e51a236498ecb062598d8a9.jpg,https://sobakevi4.ru/wp-content/uploads/2020/10/56541b222ea95.jpg,https://petguru.ru/wp-content/uploads/2018/08/royal_poodle_5.jpg}
+Золотистый ретривер	{https://ferret-pet.ru/wp-content/uploads/b/5/9/b5904cea4602b7e8125bb3618aab28b2.jpeg,https://coolwallpapers.me/picsup/5084968-dog-golden-retriever-pet.jpg,https://fun-cats.ru/wp-content/uploads/8/a/1/8a15d82423dd7720977a93c6f0c0d387.jpeg}
+Маламут	{https://fun-cats.ru/wp-content/uploads/2/5/9/2593e7695f24907c9bfe639362ba36c1.jpeg,https://faunistics.com/wp-content/uploads/2019/06/10-6.jpg,https://animalsik.com/wp-content/uploads/2016/03/alyanskiy_malamut-4-e1458641429904.jpg,https://cat4you.ru/wp-content/uploads/d/0/c/d0c0f8eaecdb22734c002fe75ff5fe37.jpeg}
+Бассет-хаунд	{https://sobakevi4.ru/wp-content/uploads/2020/08/basset-foto-2-1024x681.jpg,https://spark.ru/upload/other/5e6bee7fc5fba.jpg,https://proprikol.ru/wp-content/uploads/2019/11/foto-basset-haund-17.jpg}
+Английский бульдог	{https://ferret-pet.ru/wp-content/uploads/d/b/9/db990af0fe54182a7ff419da8e6049cc.jpeg,https://ferret-pet.ru/wp-content/uploads/e/6/c/e6c92eb70e20edf659a38aa903375078.jpeg,https://cat4you.ru/wp-content/uploads/b/d/5/bd5558610a0defa21850a38ce9fc3fc5.jpeg,https://lapkins.ru/upload/iblock/05c/05c6239179cdd5a4fe27fc4182f75e60.jpg}
+Пекинес	{https://lapkins.ru/upload/iblock/af8/af88bf5c1cdbfc7d167d63d1c68b87de.jpg,https://cat4you.ru/wp-content/uploads/d/2/8/d28580f8a0039495b0cd3c119087b0df.jpeg,https://cat4you.ru/wp-content/uploads/0/6/1/061a4b9f8c7ff9551549318600337c8f.jpeg}
+Аффенпинчер	{https://www.synlawnarkansas.com/wp-content/uploads/2015/11/noller1.jpg,https://lapkins.ru/upload/uf/82b/82b4ab18bf8503aea8154c1b42b869f6.jpg,https://cat4you.ru/wp-content/uploads/8/3/a/83af98b7a47dab46975d9d783cc4fb85.jpeg}
 \.
 
 
@@ -465,10 +460,10 @@ COPY public.photogallery (breed, photos) FROM stdin;
 COPY public.purposes (id, purpose, number_of) FROM stdin;
 6	Fighting	2
 4	Decorative	6
-3	Hunting	14
-1	Companion	26
 2	Pastoral	3
-5	Service	10
+3	Hunting	15
+5	Service	11
+1	Companion	27
 \.
 
 
@@ -478,6 +473,11 @@ COPY public.purposes (id, purpose, number_of) FROM stdin;
 
 COPY public.shelterdogs (id, name, breed, age, vaccinations, shelter_name, gender, full_description, weight, height, photo) FROM stdin;
 9	Филя	Дворняжка	1	{Стерелизован,"Полная Вакцинация"}	Сострадание	male	Филя - прекрасная собака для семьи! Она полна любви и практически всегда пребывает в хорошем настроении. С ней очень легко общаться. Филя дружелюбна, игрива, легко поддается дрессировке, ей очень нравится взаимодействовать с человеком и выполнять команды. Филя - настоящий компаньон! Она запросто заводит дружбу как с людьми, так и с другими животными. Умеет подстраиваться под настроение человека и его привычки. Очень любит детей и умеет с ними общаться.	10	50	http://forum.sostradanie-nn.ru/bb-templates/kakumei/include/uploads/temp/6229ccca548f1.jpg
+11	Карлсон	Аляскинский маламут	1	{Кастрирован,Чипирован,Привит}	Сострадание	male	Карлсон - красивый, умный и в меру упитанный мужчина в самом расцвете сил! Вместо варенья предпочитает собачьи лакомства, а вместо пропеллера у него хвост! Невероятно общителен и дружелюбен. Карлсон не любит быть один и ему срочно нужен человек для приключений. Уж очень он любопытен и обожает исследовать новые места. Отдается по договору об ответственном содержании, желательно в семью с маленьким мальчиком или девочкой, уж очень ему нравится общаться с детьми.	10	45	http://forum.sostradanie-nn.ru/bb-templates/kakumei/include/uploads/temp/61fe688465fae.jpg
+12	Вельта	Австралийская овчарка	2	{Стерелизована,Вакцинирована}	Сострадание	female	Скромница Вельта покорит сердце любого, кто заглянет в её прекрасные янтарные глаза. Но доверие девочки нужно заслужить. Вельта попала в приют щенком-подростком и уже тогда была очень стеснительной малышкой. Волонтеры помогли Вельте побороть её страхи и теперь она лучше идет на контакт с человеком. А после долгой и наполненной прекрасными эмоциями прогулки, она с удовольствием отдохнет с вами на мягком диване за просмотром любимого фильма.	14	44	http://forum.sostradanie-nn.ru/bb-templates/kakumei/include/uploads/temp/60dc766ee7c64.jpg
+13	Греция	Дворняжка	4	{Привита,Стерелизована}	Сострадание	female	Пристраивается только людям с опытом содержания собак, так как прежние владельцы не справились с ее воспитанием. Греция плохо остается в одиночестве, может хулиганить. Есть проблемы с туалетом, предпочтительно пристройство в вольер. Собака очень ласковая, контактная и ориентированная на общение с человеком. Единственный минус - невероятно ревнивая и требует много внимания.	9	39	http://forum.sostradanie-nn.ru/bb-templates/kakumei/include/uploads/temp/61336b4e49605.jpg
+14	Бэлт	Золотистый ретривер	1	{Кастрирован,"Имеет вет.паспорт",Вакцинирован}	Сострадание	male	Если бы наш Бэлт был человеком, он бы однозначно любил большие компании, путешествовал по всему миру, имел много настоящих друзей, играл в футбол, танцевал, ходил в рестораны и тусовался. Бэлти умный и быстро обучается, а за кусочек лакомства готов носить таки и мыть посуду, если вы его научите. В свободное от игр и путешествий время он не прочь погрызть косточку или понежиться в объятиях любящего человека.	15	50	http://forum.sostradanie-nn.ru/bb-templates/kakumei/include/uploads/temp/614470b32f43c.jpg
+15	Личи	Дворняжка	2	{Привит,Чипирован,Стерилизован,"Имеет вет.паспорт"}	Сострадание	male	Наш Личи – собака со стальными нервами и большим чувством собственного достоинства. Этот статный красавец совершенно не навязчив, хотя общение с человеком для него – высшее из доступных удовольствий. Кроме того, он всегда готов к работе, которую вы для него придумаете. Личи сконцентрированный пес и к обучению новых команд относится с вниманием и интересом!	10	43	http://forum.sostradanie-nn.ru/bb-templates/kakumei/include/uploads/temp/627e3e4ab530c.jpg
 \.
 
 
@@ -486,16 +486,7 @@ COPY public.shelterdogs (id, name, breed, age, vaccinations, shelter_name, gende
 --
 
 COPY public.shelters (shelter_name, shelter_location, phone_number, dogs_counter, link_on_site) FROM stdin;
-Сострадание	Бурнаковский Проезд 16	+78312162162	1	http://sostradanie-nn.ru/
-\.
-
-
---
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.users (nickname, email, password, city) FROM stdin;
-Yoko	yoko.owner@mail.ru	OchenSlojnei_Parole	Нижний Новгород
+Сострадание	Бурнаковский Проезд 16	+78312162162	6	http://sostradanie-nn.ru/
 \.
 
 
@@ -503,7 +494,7 @@ Yoko	yoko.owner@mail.ru	OchenSlojnei_Parole	Нижний Новгород
 -- Name: dog_purpose_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.dog_purpose_id_seq', 51, true);
+SELECT pg_catalog.setval('public.dog_purpose_id_seq', 54, true);
 
 
 --
@@ -517,7 +508,7 @@ SELECT pg_catalog.setval('public.purposes_id_seq', 6, true);
 -- Name: shelterdogs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.shelterdogs_id_seq', 9, true);
+SELECT pg_catalog.setval('public.shelterdogs_id_seq', 15, true);
 
 
 --
@@ -561,11 +552,38 @@ ALTER TABLE ONLY public.shelters
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: idx_characteristics; Type: INDEX; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (nickname);
+CREATE INDEX idx_characteristics ON public.dogs USING btree (main_characteristics);
+
+
+--
+-- Name: idx_life_dur; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_life_dur ON public.dogs USING btree (max_life_duration);
+
+
+--
+-- Name: idx_purposes; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_purposes ON public.dogs USING btree (purposes);
+
+
+--
+-- Name: idx_shelters; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_shelters ON public.shelterdogs USING btree (shelter_name);
+
+
+--
+-- Name: idx_size; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_size ON public.dogs USING btree (size);
 
 
 --
