@@ -8,7 +8,7 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
+SET client_encoding = 'WIN866';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
@@ -178,6 +178,8 @@ CREATE TABLE public.shelterdogs (
     vaccinations character varying(40)[],
     shelter_name character varying(30) NOT NULL,
     gender character varying(10) NOT NULL,
+    full_description text,
+    weight character varying(30),
     CONSTRAINT shelterdogs_gender_check CHECK (((gender)::text = ANY ((ARRAY['male'::character varying, 'female'::character varying])::text[])))
 );
 
@@ -285,7 +287,7 @@ Pastoral	0
 -- Data for Name: shelterdogs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.shelterdogs (id, name, breed, age, vaccinations, shelter_name, gender) FROM stdin;
+COPY public.shelterdogs (id, name, breed, age, vaccinations, shelter_name, gender, full_description, weight) FROM stdin;
 \.
 
 
