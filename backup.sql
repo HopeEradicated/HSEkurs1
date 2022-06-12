@@ -53,6 +53,27 @@ $$;
 ALTER FUNCTION public.decrease_purposes_amount() OWNER TO postgres;
 
 --
+-- Name: decrease_purps_amount(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.decrease_purps_amount() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+FOR purp_num IN 1 .. array_length(OLD.purposes, 1)
+LOOP
+UPDATE purposescounter
+SET number_of = number_of -1
+WHERE OLD.purposes[purp_num] = purposescounter.purpose;
+END LOOP;
+return OLD;
+END;
+$$;
+
+
+ALTER FUNCTION public.decrease_purps_amount() OWNER TO postgres;
+
+--
 -- Name: decrise_dogs_amount(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -106,44 +127,51 @@ $$;
 
 ALTER FUNCTION public.update_purposes_amount() OWNER TO postgres;
 
+--
+-- Name: update_purps_amount(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.update_purps_amount() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+FOR purp_num IN 1 .. array_length(NEW.purposes, 1)
+LOOP
+UPDATE purposescounter
+SET number_of = number_of +1
+WHERE NEW.purposes[purp_num] = purposescounter.purpose;
+END LOOP;
+return NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.update_purps_amount() OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: deeperpagedogs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dogs; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.deeperpagedogs (
+CREATE TABLE public.dogs (
     breed character varying(50) NOT NULL,
-    photo text,
-    life_duration character varying(70),
-    main_purpose character varying(50),
+    main_photo text,
+    life_duration character varying(20),
+    purposes character varying(30)[],
     full_description text,
-    main_characteristics character varying(50)[],
-    size character varying(30),
+    main_characteristics character varying(40)[],
+    size character varying(15),
     weight_border1 integer,
     weight_border2 integer,
-    height_female integer,
     height_male integer,
-    CONSTRAINT deeperpagedogs_size_check CHECK (((size)::text = ANY ((ARRAY['¬Ґ«Є п'::character varying, 'агз­ п'::character varying, 'баҐ¤­пп'::character varying, 'ЄагЇ­ п'::character varying, '®зҐ­м ЄагЇ­ п'::character varying])::text[])))
+    height_female integer
 );
 
 
-ALTER TABLE public.deeperpagedogs OWNER TO postgres;
-
---
--- Name: mainpagedogs; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.mainpagedogs (
-    breed character varying(50) NOT NULL,
-    photo text,
-    description text
-);
-
-
-ALTER TABLE public.mainpagedogs OWNER TO postgres;
+ALTER TABLE public.dogs OWNER TO postgres;
 
 --
 -- Name: photogallery; Type: TABLE; Schema: public; Owner: postgres
@@ -185,6 +213,7 @@ CREATE TABLE public.shelterdogs (
     full_description text,
     weight integer NOT NULL,
     height integer NOT NULL,
+    photo text,
     CONSTRAINT shelterdogs_age_check CHECK ((age > 0)),
     CONSTRAINT shelterdogs_gender_check CHECK (((gender)::text = ANY ((ARRAY['male'::character varying, 'female'::character varying])::text[])))
 );
@@ -222,6 +251,7 @@ CREATE TABLE public.shelters (
     shelter_location character varying(50),
     phone_number character varying(15),
     dogs_counter integer DEFAULT 0,
+    link_on_site text,
     CONSTRAINT shelters_phone_number_check CHECK ((phone_number IS NOT NULL)),
     CONSTRAINT shelters_shelter_location_check CHECK ((shelter_location IS NOT NULL))
 );
@@ -251,29 +281,18 @@ ALTER TABLE ONLY public.shelterdogs ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- Data for Name: deeperpagedogs; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: dogs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.deeperpagedogs (breed, photo, life_duration, main_purpose, full_description, main_characteristics, size, weight_border1, weight_border2, height_female, height_male) FROM stdin;
-Ђўбва «Ё©бЄ п ®ўз аЄ 	https://placepic.ru/wp-content/uploads/2019/07/merle-dog-long.jpg	 13 - 15 «Ґв	Companion	ЌҐ б®Ў Є  - ¬Ґзв 	{"ЋзҐ­м ЇаҐ¤ ­­ п",„аг¦Ґ«оЎ­ п,"Џ®¤е®¤Ёв ¤«п ®е®вл"}	ЄагЇ­ п	26	50	53	58
-ЂЄЁв -Ё­г	https://lapkins.ru/upload/uf/78e/78e8b448a6ebc51f00d4f68203c82c9b.jpg	 10 - 13 «Ґв	Companion	џЇ®­бЄЁ© Ў «¤с¦, ўбҐ¬ аҐЄ®¬Ґ­¤го	{"‚лб®ЄЁ© Ё­вҐ««ҐЄв","Џа®¦Ёў ­ЁҐ ў­Ґ ¤®¬ ","Џ®¤е®¤Ёв ¤«п ®е®вл"}	ЄагЇ­ п	35	50	66	71
-Џг¤Ґ«м	https://lapkins.ru/upload/iblock/6e5/6e52cb986e51a236498ecb062598d8a9.jpg	 10 - 18 «Ґв	Hunting	Љг¤апўҐ­мЄ п, ўлЈ«п¤Ёв § Ў ў­®	{"Њ «® «Ё­пҐв",„аг¦Ґ«оЎ­ п,"Џ®¤е®¤Ёв ¤«п ®е®вл","•®а®иҐҐ Ї®б«ги ­ЁҐ"}	ЄагЇ­ п	26	35	53	58
-ЌҐ¬ҐжЄ п ®ўз аЄ 	https://proprikol.ru/wp-content/uploads/2020/10/kartinki-nemeczkoj-ovcharki-1.jpg	 12 - 15 «Ґв	Service	‚®§¬®¦­® Ё¬Ґ­­® ®­  б­Ё¬ « бм ў Њгев аҐ	{"Џа®¦Ёў ­ЁҐ ў­Ґ ¤®¬ ","ЋзҐ­м ЇаҐ¤ ­­ п","Џ®¤е®¤Ёв ¤«п ®е®вл","•®а®иҐҐ Ї®б«ги ­ЁҐ"}	ЄагЇ­ п	28	40	60	65
-ЏҐЄЁ­Ґб	https://sobakevi4.ru/wp-content/uploads/2020/08/1.-pekines-imeet-drevnie-korni.jpg	 15 - 16 «Ґв	Decorative	‹Ёж® б¬Ґи­®Ґ	{"Њ «® « Ґв","ЋвбгвбвўгҐв згўбвў® бва е ","ЋзҐ­м ЇаҐ¤ ­­ п"}	¬Ґ«Є п	6	10	53	58
-— г-— г	https://porodysobak.com/wp-content/uploads/2019/12/chow-chow_01_lg.jpg	 9 - 15 «Ґв	Companion	ЋЈа®¬­ п Ё « бЄ®ў п	{"Џ®¤е®¤Ёв ¤«п ®еа ­л","ЋзҐ­м ЇаҐ¤ ­­ п"}	ЄагЇ­ п	25	32	51	56
-Њ «мвЁЇг	https://skstoit.ru/wp-content/uploads/2022/01/skolko-stoit-maltipu-1.jpg	 13 - 15 «Ґв	Decorative	Њ «Ґ­мЄ п, г¤®Ў­® Ўа вм б б®Ў®© ў ЄагЈ®бўҐв­®Ґ ЇгвҐиҐбвўЁҐ	{"Њ «® « Ґв","ЋзҐ­м ЇаҐ¤ ­­ п"}	¬Ґ«Є п	5	10	29	30
-Sharpey	https://cat4you.ru/wp-content/uploads/b/5/b/b5bbf97fa1462f2353a229592ec0e7ea.jpeg	 9 - 11 «Ґв	Companion	Џ®е®¦  ­  ЊЁи«Ґ­	{"‚лб®ЄЁ© Ё­вҐ««ҐЄв","Џ®¤е®¤Ёв ¤«п ®еа ­л","ЋзҐ­м ЇаҐ¤ ­­ п"}	баҐ¤­пп	11	25	50	52
-\.
-
-
---
--- Data for Name: mainpagedogs; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.mainpagedogs (breed, photo, description) FROM stdin;
-Ђўбва «Ё©бЄЁ© вҐамҐа	https://catfishes.ru/wp-content/uploads/2020/03/malsob1.jpg	ЊҐ«Є п еҐа­п ЎҐЈ Ґв ўЁ«пҐв еў®бв®¬
-ЂЁ¤Ё	https://catfishes.ru/wp-content/uploads/2020/09/atlas1.jpg	’гЇ® ЈЁЈ з ¤
-ЂЄЁв -Ё­г	https://catfishes.ru/wp-content/uploads/2021/06/akita4.jpg	ЉаҐЇЄЁ© ¤аг¦®Є-ЇЁа®¦®Є
+COPY public.dogs (breed, main_photo, life_duration, purposes, full_description, main_characteristics, size, weight_border1, weight_border2, height_male, height_female) FROM stdin;
+Австралийская овчарка	https://placepic.ru/wp-content/uploads/2019/07/merle-dog-long.jpg	 13 - 15 лет	{Service,Hunting,Pastoral}	Не собака - мечта	{"Очень преданная",Дружелюбная,"Подходит для охоты"}	крупная	26	50	53	58
+Акита-ину	https://lapkins.ru/upload/uf/78e/78e8b448a6ebc51f00d4f68203c82c9b.jpg	 10 - 13 лет	{Companion}	Японский балдёж, всем рекомендую	{"Высокий интеллект","Проживание вне дома","Подходит для охоты"}	крупная	35	50	66	71
+Пудель	https://lapkins.ru/upload/iblock/6e5/6e52cb986e51a236498ecb062598d8a9.jpg	 10 - 18 лет	{Hunting,Companion}	Кудрявенькая, выглядит забавно	{"Мало линяет",Дружелюбная,"Подходит для охоты","Хорошее послушание"}	крупная	26	35	53	58
+Немецкая овчарка	https://proprikol.ru/wp-content/uploads/2020/10/kartinki-nemeczkoj-ovcharki-1.jpg	 12 - 15 лет	{Service,Hunting,Pastoral}	Возможно именно она снималась в Мухтаре	{"Проживание вне дома","Очень преданная","Подходит для охоты","Хорошее послушание"}	крупная	28	40	60	65
+Пекинес	https://sobakevi4.ru/wp-content/uploads/2020/08/1.-pekines-imeet-drevnie-korni.jpg	 15 - 16 лет	{Decorative,Companion}	Лицо смешное	{"Мало лает","Отсутствует чувство страха","Очень преданная"}	мелкая	6	10	53	58
+Чау-Чау	https://porodysobak.com/wp-content/uploads/2019/12/chow-chow_01_lg.jpg	 9 - 15 лет	{Companion}	Огромная и ласковая	{"Подходит для охраны","Очень преданная"}	крупная	25	32	51	56
+Мальтипу	https://skstoit.ru/wp-content/uploads/2022/01/skolko-stoit-maltipu-1.jpg	 13 - 15 лет	{Decorative,Companion}	Маленькая, удобно брать с собой в кругосветное путешествие	{"Мало лает","Очень преданная"}	мелкая	5	10	29	30
+Шарпей	https://cat4you.ru/wp-content/uploads/b/5/b/b5bbf97fa1462f2353a229592ec0e7ea.jpeg	 9 - 11 лет	{Companion}	Похожа на Мишлен	{"Высокий интеллект","Подходит для охраны","Очень преданная"}	средняя	11	25	50	52
 \.
 
 
@@ -282,6 +301,8 @@ COPY public.mainpagedogs (breed, photo, description) FROM stdin;
 --
 
 COPY public.photogallery (breed, photos) FROM stdin;
+Џг¤Ґ«м	{https://sobakevi4.ru/wp-content/uploads/2020/08/1.-pekines-imeet-drevnie-korni.jpg}
+Пудель	{https://lapkins.ru/upload/iblock/6e5/6e52cb986e51a236498ecb062598d8a9.jpg,https://sobakevi4.ru/wp-content/uploads/2020/10/56541b222ea95.jpg,https://petguru.ru/wp-content/uploads/2018/08/royal_poodle_5.jpg}
 \.
 
 
@@ -290,12 +311,12 @@ COPY public.photogallery (breed, photos) FROM stdin;
 --
 
 COPY public.purposescounter (purpose, number_of) FROM stdin;
-Pastoral	0
 Fighting	0
-Hunting	1
-Service	1
-Companion	4
+Service	2
+Hunting	3
+Pastoral	2
 Decorative	2
+Companion	6
 \.
 
 
@@ -303,7 +324,8 @@ Decorative	2
 -- Data for Name: shelterdogs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.shelterdogs (id, name, breed, age, vaccinations, shelter_name, gender, full_description, weight, height) FROM stdin;
+COPY public.shelterdogs (id, name, breed, age, vaccinations, shelter_name, gender, full_description, weight, height, photo) FROM stdin;
+9	Филя	Дворняжка	1	{Стерелизован,"Полная Вакцинация"}	Сострадание	male	Филя - прекрасная собака для семьи! Она полна любви и практически всегда пребывает в хорошем настроении. С ней очень легко общаться. Филя дружелюбна, игрива, легко поддается дрессировке, ей очень нравится взаимодействовать с человеком и выполнять команды. Филя - настоящий компаньон! Она запросто заводит дружбу как с людьми, так и с другими животными. Умеет подстраиваться под настроение человека и его привычки. Очень любит детей и умеет с ними общаться.	10	50	http://forum.sostradanie-nn.ru/bb-templates/kakumei/include/uploads/temp/6229ccca548f1.jpg
 \.
 
 
@@ -311,8 +333,8 @@ COPY public.shelterdogs (id, name, breed, age, vaccinations, shelter_name, gende
 -- Data for Name: shelters; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.shelters (shelter_name, shelter_location, phone_number, dogs_counter) FROM stdin;
-Rakom Sakom	NN ylica Jopa	89877456194	0
+COPY public.shelters (shelter_name, shelter_location, phone_number, dogs_counter, link_on_site) FROM stdin;
+Сострадание	Бурнаковский Проезд 16	+78312162162	1	http://sostradanie-nn.ru/
 \.
 
 
@@ -321,6 +343,7 @@ Rakom Sakom	NN ylica Jopa	89877456194	0
 --
 
 COPY public.users (nickname, email, password, city) FROM stdin;
+Yoko	yoko.owner@mail.ru	OchenSlojnei_Parole	Нижний Новгород
 \.
 
 
@@ -328,23 +351,15 @@ COPY public.users (nickname, email, password, city) FROM stdin;
 -- Name: shelterdogs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.shelterdogs_id_seq', 8, true);
+SELECT pg_catalog.setval('public.shelterdogs_id_seq', 9, true);
 
 
 --
--- Name: deeperpagedogs deeperpagedogs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dogs dogs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.deeperpagedogs
-    ADD CONSTRAINT deeperpagedogs_pkey PRIMARY KEY (breed);
-
-
---
--- Name: mainpagedogs mainpagedogs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.mainpagedogs
-    ADD CONSTRAINT mainpagedogs_pkey PRIMARY KEY (breed);
+ALTER TABLE ONLY public.dogs
+    ADD CONSTRAINT dogs_pkey PRIMARY KEY (breed);
 
 
 --
@@ -394,17 +409,17 @@ CREATE TRIGGER dogs_trigger AFTER INSERT ON public.shelterdogs FOR EACH ROW EXEC
 
 
 --
--- Name: deeperpagedogs purpose_decrease_trigger; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: dogs purps_decrease_trigger; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER purpose_decrease_trigger BEFORE DELETE ON public.deeperpagedogs FOR EACH ROW EXECUTE FUNCTION public.decrease_purposes_amount();
+CREATE TRIGGER purps_decrease_trigger BEFORE DELETE ON public.dogs FOR EACH ROW EXECUTE FUNCTION public.decrease_purps_amount();
 
 
 --
--- Name: deeperpagedogs purpose_trigger; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: dogs purps_trigger; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-CREATE TRIGGER purpose_trigger AFTER INSERT ON public.deeperpagedogs FOR EACH ROW EXECUTE FUNCTION public.update_purposes_amount();
+CREATE TRIGGER purps_trigger AFTER INSERT ON public.dogs FOR EACH ROW EXECUTE FUNCTION public.update_purps_amount();
 
 
 --
@@ -413,14 +428,6 @@ CREATE TRIGGER purpose_trigger AFTER INSERT ON public.deeperpagedogs FOR EACH RO
 
 ALTER TABLE ONLY public.shelterdogs
     ADD CONSTRAINT fk_breed_photos FOREIGN KEY (shelter_name) REFERENCES public.shelters(shelter_name);
-
-
---
--- Name: deeperpagedogs fk_purposes; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.deeperpagedogs
-    ADD CONSTRAINT fk_purposes FOREIGN KEY (main_purpose) REFERENCES public.purposescounter(purpose);
 
 
 --
