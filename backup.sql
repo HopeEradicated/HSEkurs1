@@ -60,11 +60,12 @@ CREATE FUNCTION public.decrease_purps_amount() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
+DELETE FROM dog_purpose WHERE dog_purpose.breed = OLD.breed;
 FOR purp_num IN 1 .. array_length(OLD.purposes, 1)
 LOOP
-UPDATE purposescounter
+UPDATE purposes
 SET number_of = number_of -1
-WHERE OLD.purposes[purp_num] = purposescounter.purpose;
+WHERE OLD.purposes[purp_num] = purposes.purpose;
 END LOOP;
 return OLD;
 END;
@@ -134,12 +135,15 @@ ALTER FUNCTION public.update_purposes_amount() OWNER TO postgres;
 CREATE FUNCTION public.update_purps_amount() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+DECLARE cur_id INT;
 BEGIN
 FOR purp_num IN 1 .. array_length(NEW.purposes, 1)
 LOOP
-UPDATE purposescounter
+cur_id:=(SELECT id FROM purposes WHERE NEW.purposes[purp_num] = purposes.purpose);
+INSERT INTO dog_purpose (breed, id_purpose) VALUES (NEW.breed, cur_id);
+UPDATE purposes
 SET number_of = number_of +1
-WHERE NEW.purposes[purp_num] = purposescounter.purpose;
+WHERE NEW.purposes[purp_num] = purposes.purpose;
 END LOOP;
 return NEW;
 END;
@@ -151,6 +155,40 @@ ALTER FUNCTION public.update_purps_amount() OWNER TO postgres;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: dog_purpose; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.dog_purpose (
+    id bigint NOT NULL,
+    breed character varying(30) NOT NULL,
+    id_purpose integer
+);
+
+
+ALTER TABLE public.dog_purpose OWNER TO postgres;
+
+--
+-- Name: dog_purpose_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.dog_purpose_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.dog_purpose_id_seq OWNER TO postgres;
+
+--
+-- Name: dog_purpose_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.dog_purpose_id_seq OWNED BY public.dog_purpose.id;
+
 
 --
 -- Name: dogs; Type: TABLE; Schema: public; Owner: postgres
@@ -187,16 +225,38 @@ CREATE TABLE public.photogallery (
 ALTER TABLE public.photogallery OWNER TO postgres;
 
 --
--- Name: purposescounter; Type: TABLE; Schema: public; Owner: postgres
+-- Name: purposes; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.purposescounter (
-    purpose character varying(50) NOT NULL,
+CREATE TABLE public.purposes (
+    id bigint NOT NULL,
+    purpose character varying(30) NOT NULL,
     number_of integer DEFAULT 0
 );
 
 
-ALTER TABLE public.purposescounter OWNER TO postgres;
+ALTER TABLE public.purposes OWNER TO postgres;
+
+--
+-- Name: purposes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.purposes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.purposes_id_seq OWNER TO postgres;
+
+--
+-- Name: purposes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.purposes_id_seq OWNED BY public.purposes.id;
+
 
 --
 -- Name: shelterdogs; Type: TABLE; Schema: public; Owner: postgres
@@ -274,10 +334,34 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO postgres;
 
 --
+-- Name: dog_purpose id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dog_purpose ALTER COLUMN id SET DEFAULT nextval('public.dog_purpose_id_seq'::regclass);
+
+
+--
+-- Name: purposes id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.purposes ALTER COLUMN id SET DEFAULT nextval('public.purposes_id_seq'::regclass);
+
+
+--
 -- Name: shelterdogs id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.shelterdogs ALTER COLUMN id SET DEFAULT nextval('public.shelterdogs_id_seq'::regclass);
+
+
+--
+-- Data for Name: dog_purpose; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.dog_purpose (id, breed, id_purpose) FROM stdin;
+3	Алабай	1
+4	Алабай	6
+\.
 
 
 --
@@ -293,6 +377,8 @@ COPY public.dogs (breed, main_photo, life_duration, purposes, full_description, 
 Чау-Чау	https://porodysobak.com/wp-content/uploads/2019/12/chow-chow_01_lg.jpg	 9 - 15 лет	{Companion}	Огромная и ласковая	{"Подходит для охраны","Очень преданная"}	крупная	25	32	51	56
 Мальтипу	https://skstoit.ru/wp-content/uploads/2022/01/skolko-stoit-maltipu-1.jpg	 13 - 15 лет	{Decorative,Companion}	Маленькая, удобно брать с собой в кругосветное путешествие	{"Мало лает","Очень преданная"}	мелкая	5	10	29	30
 Шарпей	https://cat4you.ru/wp-content/uploads/b/5/b/b5bbf97fa1462f2353a229592ec0e7ea.jpeg	 9 - 11 лет	{Companion}	Похожа на Мишлен	{"Высокий интеллект","Подходит для охраны","Очень преданная"}	средняя	11	25	50	52
+Дворняжка	https://ferret-pet.ru/wp-content/uploads/3/6/0/360b8716727a6e66f371f10b1c6e2264.jpeg	10 - 16 лет	{Companion}	Генетика свободно размножающихся собак представляет интерес для исследователей, так как история современных пород насчитывает как максимум несколько сотен лет; бутылочные горлышки разведения собак приводят к увеличению неравновесного сцепления генов и препятствуют восстановлению истории развития собак. Исследование генома свободно размножающихся беспородных собак в Евразии выявило отличия, свидетельствующие об их отдельной эволюции; они не представляют собой результат беспорядочного скрещивания чистопородных собак.	{"Очень преданная","Подходит для охраны"}	средняя	20	38	30	45
+Алабай	https://sobakemozhno.ru/wp-content/uploads/2020/11/alabaj-ili-sredneaziatskaja-ovcharka-21-1024x679.jpg	9 - 12 лет	{Companion,Fighting}	Алабай - среднеазиатская овчарка, изначально выведенная в качестве сторожевой и пастушьей собаки. Считается одной из самых древних пород, имеет огромные размеры и относится к самым сильным и выносливым псамам. Порода обладает ярко выраженными инстинктами охранника и бесстрашного защитника. Ее характерным признаком является независимость практически во всех поведенческих реакциях.	{"Очень преданная",Дружелюбная,"Хорошее послушание"}	очень крупная	40	50	70	65
 \.
 
 
@@ -307,16 +393,16 @@ COPY public.photogallery (breed, photos) FROM stdin;
 
 
 --
--- Data for Name: purposescounter; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: purposes; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.purposescounter (purpose, number_of) FROM stdin;
-Fighting	0
-Service	2
-Hunting	3
-Pastoral	2
-Decorative	2
-Companion	6
+COPY public.purposes (id, purpose, number_of) FROM stdin;
+2	Pastoral	2
+3	Hunting	3
+4	Decorative	2
+5	Service	2
+1	Companion	7
+6	Fighting	1
 \.
 
 
@@ -348,10 +434,32 @@ Yoko	yoko.owner@mail.ru	OchenSlojnei_Parole	Нижний Новгород
 
 
 --
+-- Name: dog_purpose_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.dog_purpose_id_seq', 4, true);
+
+
+--
+-- Name: purposes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.purposes_id_seq', 6, true);
+
+
+--
 -- Name: shelterdogs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.shelterdogs_id_seq', 9, true);
+
+
+--
+-- Name: dog_purpose dog_purpose_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dog_purpose
+    ADD CONSTRAINT dog_purpose_pkey PRIMARY KEY (id);
 
 
 --
@@ -363,11 +471,11 @@ ALTER TABLE ONLY public.dogs
 
 
 --
--- Name: purposescounter purposescounter_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: purposes purposes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.purposescounter
-    ADD CONSTRAINT purposescounter_pkey PRIMARY KEY (purpose);
+ALTER TABLE ONLY public.purposes
+    ADD CONSTRAINT purposes_pkey PRIMARY KEY (id);
 
 
 --
@@ -423,11 +531,27 @@ CREATE TRIGGER purps_trigger AFTER INSERT ON public.dogs FOR EACH ROW EXECUTE FU
 
 
 --
+-- Name: shelterdogs fk_breed; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shelterdogs
+    ADD CONSTRAINT fk_breed FOREIGN KEY (breed) REFERENCES public.dogs(breed);
+
+
+--
 -- Name: shelterdogs fk_breed_photos; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.shelterdogs
     ADD CONSTRAINT fk_breed_photos FOREIGN KEY (shelter_name) REFERENCES public.shelters(shelter_name);
+
+
+--
+-- Name: dog_purpose pk_purpose_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.dog_purpose
+    ADD CONSTRAINT pk_purpose_id FOREIGN KEY (id_purpose) REFERENCES public.purposes(id);
 
 
 --
