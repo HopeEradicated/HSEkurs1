@@ -36,14 +36,14 @@ jobs:
         pytest
           
     - name: Upload artifact
-    - uses: actions/upload-artidact@v3
+      uses: actions/upload-artidact@v3
       with:
         name: artifact
         path: ${{ env.app_name }}_${{ runner.os }}
         retention-days: 5
 
     - name: Telegram message
-    - uses: appleboy/telegram-action@master
+      uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.BOT_TGTOKEN }}
         token: ${{ secrets.BOT_TGTOKEN }}
