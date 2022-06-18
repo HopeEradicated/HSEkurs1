@@ -36,7 +36,7 @@ jobs:
         pytest
           
     - name: Upload artifact
-      uses: actions/upload-artidact@v3
+      uses: actions/upload-artifact@v3
       with:
         name: artifact
         path: ${{ env.app_name }}_${{ runner.os }}
