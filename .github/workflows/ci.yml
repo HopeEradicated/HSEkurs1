@@ -44,9 +44,10 @@ jobs:
     - name: Telegram message
       uses: appleboy/telegram-action@master
       with:
-        to: ${{ secrets.BOT_TGTOKEN }}
+        to: 826611050
         token: ${{ secrets.BOT_TGTOKEN }}
         message: |
-          Event occured in ${{ github.repository }} repository.
-          ${{ github.event_name }}
+          Event occured in ${{ github.repository }} repository by ${{ github.actor }}.
+          ${{ github.event.name }}
+          Event status: ${{ job.status }}
         document: ${{ env.app_name }}_${{ runner.os }}
