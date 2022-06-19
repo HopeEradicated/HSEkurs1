@@ -32,11 +32,7 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - run: "python -m build --sdist --wheel ."
-    - run: "ls -l dist"
-    - run: "check-wheel-contents dist/*.whl"
-    - name: Check description
-      run: "python -m twine check dist/*"
+    - run: "python config.py sdist"
                  
     - name: Upload artifact
       uses: actions/upload-artifact@v3
