@@ -46,7 +46,7 @@ jobs:
       with:
         to: ${{ secrets.BOT_TGTOKEN }}
         token: ${{ secrets.BOT_TGTOKEN }}
-        massage: |
+        message: |
           Event occured in ${{ github.repository }} repository.
           ${{ github.event_name }}
         document: ${{ env.app_name }}_${{ runner.os }}
